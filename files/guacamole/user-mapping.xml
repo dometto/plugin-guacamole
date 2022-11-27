@@ -1,0 +1,13 @@
+<user-mapping>
+    <authorize
+            username="admin"
+            password=""
+            encoding="md5">
+
+        <connection name="SURF VM">
+            <protocol>rdp</protocol>
+            <param name="hostname">localhost</param>
+            <param name="port">3389</param>
+        </connection>
+    </authorize>
+</user-mapping>

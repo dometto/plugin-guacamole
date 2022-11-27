@@ -1,0 +1,140 @@
+---
+- name: Install Guacamole
+  hosts: localhost
+  gather_facts: false
+
+  tasks:
+    - name: Wait for system to become reachable
+      wait_for_connection:
+        timeout: 300
+
+    - name: Gather facts for first time
+      setup:
+
+    - name: Install dependencies
+      package:
+        name:
+          - make
+          - gcc
+          - g++
+          - libcairo2-dev
+          - libjpeg-turbo8-dev
+          - libpng-dev
+          - libtool-bin
+          - libossp-uuid-dev
+          - libavcodec-dev
+          - libavutil-dev
+          - libswscale-dev
+          - freerdp2-dev
+          - libpango1.0-dev
+          - libssh2-1-dev
+          - libvncserver-dev
+          - libtelnet-dev
+          - libssl-dev
+          - libvorbis-dev
+          - libwebp-dev
+        state: present
+
+    - name: Install Tomcat9
+      package:
+        name:
+          - tomcat9
+          - tomcat9-admin
+          - tomcat9-common
+          - tomcat9-user
+        state: present
+
+    - name: Start and enable Tomcat9
+      service:
+        name: tomcat9
+        state: started
+        enabled: yes
+
+    - name: Download Guacamole server
+      unarchive:
+        src: https://downloads.apache.org/guacamole/1.3.0/source/guacamole-server-1.3.0.tar.gz
+        dest: /tmp/
+        remote_src: yes
+
+    - name: Execute configure script
+      shell: ./configure --with-init-dir=/etc/init.d
+      args:
+        chdir: /tmp/guacamole-server-1.3.0
+
+    - name: Build target
+      make:
+        chdir: /tmp/guacamole-server-1.3.0
+
+    - name: Run install target
+      make:
+        chdir: /tmp/guacamole-server-1.3.0
+        target: install
+
+    - name: Update system's cache of installed libraries
+      shell: ldconfig
+      args:
+        chdir: /tmp/guacamole-server-1.3.0
+
+    - name: Start and enable guacd
+      service:
+        name: guacd
+        state: started
+        enabled: yes
+
+    - name: Copy guacamole folder
+      copy:
+        src: files/guacamole/
+        dest: /etc/guacamole/
+
+    - name: Download Guacamole client
+      get_url:
+        url: https://downloads.apache.org/guacamole/1.3.0/binary/guacamole-1.3.0.war
+        dest: /etc/guacamole/guacamole.war
+
+    - name: Create a symbolic link of the guacamole client
+      file:
+        src: /etc/guacamole/guacamole.war
+        dest: /var/lib/tomcat9/webapps/guacamole.war
+        state: link
+
+    - name: Create extensions and lib directories
+      file:
+        path: /etc/guacamole/lib
+        state: directory
+
+    - name: Configure tomcat9
+      lineinfile:
+        path: /etc/default/tomcat9
+        line: 'GUACAMOLE_HOME=/etc/guacamole'
+
+    - name: Remove color profile pop-up
+      copy:
+        src: files/polkit/45-allow-colord.pkla
+        dest: /etc/polkit-1/localauthority/50-local.d/45-allow-colord.pkla
+
+    - name: Create nginx location block
+      copy:
+        src: files/nginx/guacamole.conf
+        dest: /etc/nginx/app-location-conf.d/guacamole.conf
+        mode: 0644
+
+    - name: Restart nginx
+      service:
+        name: nginx
+        state: restarted
+
+    - name: Restart tomcat9
+      service:
+        name: tomcat9
+        state: restarted
+
+    - name: Start guacd
+      register: start_guacd
+      service:
+        name: guacd
+        state: started
+
+    - debug:
+        msg: 'service_url: {"url": "https://{{ ansible_host }}", "tag": "web", "description": "Guacamole"}'
+      when: (start_guacd is succeeded)
+

@@ -116,7 +116,7 @@
           pid_file = /var/run/guacd.pid
 
           [server]
-          
+
           bind_host = {{ guacamole_guacd_host | default('localhost') }}
           bind_port = {{ guacamole_guacd_port | default('4822') }}
 
@@ -134,7 +134,7 @@
       register: start_guacd
       service:
         name: guacd
-        state: started
+        state: restarted
 
     - debug:
         msg: 'service_url: {"url": "https://{{ ansible_host }}", "tag": "web", "description": "Guacamole"}'

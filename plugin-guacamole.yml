@@ -112,17 +112,6 @@
         src: files/polkit/45-allow-colord.pkla
         dest: /etc/polkit-1/localauthority/50-local.d/45-allow-colord.pkla
 
-    - name: Create nginx location block
-      copy:
-        src: files/nginx/guacamole.conf
-        dest: /etc/nginx/app-location-conf.d/guacamole.conf
-        mode: 0644
-
-    - name: Restart nginx
-      service:
-        name: nginx
-        state: restarted
-
     - name: Restart tomcat9
       service:
         name: tomcat9

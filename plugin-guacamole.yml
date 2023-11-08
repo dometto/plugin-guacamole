@@ -112,8 +112,8 @@
         src: templates/guacd.conf
         dest: /etc/guacamole/guacd.conf
       vars:
-        guacamole_guacd_host: "{{ guacamole_guacd_host | default('localhost') }}"
-        guacamole_guacd_port: "{{ guacamole_guacd_port | default('4822') }}"
+        guacd_host: "{{ guacamole_guacd_host | default('localhost') }}"
+        guacd_port: "{{ guacamole_guacd_port | default('4822') }}"
 
     - name: Remove color profile pop-up
       copy:

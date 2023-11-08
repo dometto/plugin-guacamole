@@ -111,11 +111,11 @@
       copy:
         dest: /etc/guacamole/guacd.conf
         content: |
-        [daemon]
-        pid_file = /var/run/guacd.pid
-        [server]
-        bind_host = {{ guacamole_guacd_host | default('localhost') }}
-        bind_port = {{ guacamole_guacd_port | default('4822') }}
+          [daemon]
+          pid_file = /var/run/guacd.pid
+          [server]
+          bind_host = {{ guacamole_guacd_host | default('localhost') }}
+          bind_port = {{ guacamole_guacd_port | default('4822') }}
 
     - name: Remove color profile pop-up
       copy:

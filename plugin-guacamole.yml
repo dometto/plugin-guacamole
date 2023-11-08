@@ -111,7 +111,7 @@
       template:
         src: templates/guacd.conf
         dest: /etc/guacamole/guacd.conf
-      with_vars:
+      vars:
         guacamole_guacd_host: "{{ guacamole_guacd_host | default('localhost') }}"
         guacamole_guacd_port: "{{ guacamole_guacd_port | default('4822') }}"
 
